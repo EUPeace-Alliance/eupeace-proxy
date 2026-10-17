@@ -1,0 +1,75 @@
+services:
+  db:
+    image: postgres:15-alpine
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    ports:
+      - "6432:5432" 
+    environment:
+      - AUTH_TYPE=scram-sha-256
+      - DB_HOST=db
+      - DB_PORT=5432 
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - POOL_MODE=transaction
+      - MAX_CLIENT_CONN=10000
+      - DEFAULT_POOL_SIZE=50
+    depends_on:
+      - db
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes # Persist data on disk to retain sessions across restarts
+    volumes:
+      - redis_data:/data
+    restart: always
+
+  web:
+    build: .
+    command: gunicorn hybrid_project.wsgi:application --bind 0.0.0.0:8000 --workers 4 --worker-class gevent
+    env_file:
+      - .env
+    volumes:
+      - static_volume:/app/static
+      - ./certs:/app/certs
+    depends_on:
+      - pgbouncer
+      - redis
+    restart: always
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - static_volume:/app/static
+      - ./static/logo_eupeace.png:/app/static/logo_eupeace.png:ro
+      - certbot_www:/var/www/certbot
+      - certbot_certs:/etc/nginx/ssl
+    depends_on:
+      - web
+    restart: always
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_certs:/etc/letsencrypt
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+  certbot_www:
+  certbot_certs:

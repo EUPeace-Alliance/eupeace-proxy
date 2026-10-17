@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy - EUPEACE Proxy{% endblock %}
+
+{% block extra_head %}
+<style>
+    .login-card {
+        max-width: 800px !important; 
+    }
+    .policy-section h2 {
+        font-size: 1.5rem;
+        color: var(--eupeace-blue);
+        border-bottom: 2px solid var(--eupeace-light-gray);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .policy-section h3 {
+        font-size: 1.1rem;
+        color: #333;
+        margin-top: 1.5rem;
+        font-weight: 700;
+    }
+    .policy-section p, .policy-section li {
+        font-size: 0.95rem;
+        color: #555;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'wayf' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1 text-decoration-none shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+        </svg>
+        <span class="fw-semibold">Torna alla Home / Back to Home</span>
+    </a>
+</div>
+
+<div class="policy-section overflow-auto" style="max-height: 70vh; padding-right: 15px;">
+    <!-- English Section -->
+    <h2 class="fw-bold">Privacy Policy for the EUPEACE Federated Identity Proxy</h2>
+    
+    <h3>1. Data Controller</h3>
+    <p>The Data Controller is the European University Alliance coordinating the EUPEACE proxy infrastructure.<br>
+    <strong>Data Protection Officer (DPO):</strong> <a href="mailto:dpo@eupeace.eu">dpo@eupeace.eu</a></p>
+
+    <h3>2. Purpose of Data Processing</h3>
+    <p>Personal data is processed exclusively to provide secure, cross-institutional authentication and authorization to EUPEACE digital services (e.g., collaborative platforms, shared Moodle LMS) via the eduGAIN interfederation. This service adheres to the GÉANT Data Protection Code of Conduct (CoCo).</p>
+
+    <h3>3. Requested Attributes and Legal Justification</h3>
+    <p>To ensure proper functioning of services, the proxy requests the following minimal set of SAML attributes from the user's Home Identity Provider:</p>
+    <ul>
+        <li><strong>eduPersonPrincipalName (ePPN):</strong> Required for the unique, persistent identification of the user across the federated infrastructure and for local account provisioning.</li>
+        <li><strong>mail:</strong> Necessary for delivering essential service communications, platform notifications, and technical support.</li>
+        <li><strong>givenName (First Name) & sn (Last Name):</strong> Required for personalized user experience within learning environments and official course completion certificates.</li>
+        <li><strong>eduPersonScopedAffiliation:</strong> Essential for verifying the user's institutional role (e.g., student, faculty, staff) to automatically enforce role-based access control.</li>
+        <li><strong>schacPersonalUniqueCode (European Student Identifier - ESI):</strong> Required to uniquely identify students across European higher education institutions, facilitating transnational mobility.</li>
+    </ul>
+    <p class="text-muted fst-italic"><small>* Note: The user's home organization domain is automatically derived from the institutional scope suffix of eduPersonPrincipalName or eduPersonScopedAffiliation, minimizing attribute exposure.</small></p>
+
+    <h3>4. Data Retention</h3>
+    <p>Personal data is retained only for the duration of the user's active engagement with EUPEACE services. Inactive user profiles are automatically purged 12 months after the user's last login, retaining only anonymized logs for security audits.</p>
+
+    <h3>5. User Rights</h3>
+    <p>Under the General Data Protection Regulation (GDPR), users have the right to request access to, rectification of, or erasure of their personal data. Requests can be submitted to the Data Controller at <a href="mailto:dpo@eupeace.eu">dpo@eupeace.eu</a>.</p>
+    
+    <h3>6. Use of Cookies</h3>
+    <p>This service only uses strictly necessary technical cookies (e.g., session cookies and CSRF tokens) required for secure user authentication and proper system functionality. No tracking, profiling, or marketing cookies are used.</p>
+    <hr class="my-5">
+
+    <!-- Italian Section -->
+    <h2 class="fw-bold">Informativa Privacy per il Proxy di Identità Federata EUPEACE</h2>
+    
+    <h3>1. Titolare del Trattamento</h3>
+    <p>Il Titolare del Trattamento è l'Alleanza delle Università Europee coordinatrice dell'infrastruttura proxy EUPEACE.<br>
+    <strong>Responsabile della Protezione dei Dati (DPO):</strong> <a href="mailto:dpo@eupeace.eu">dpo@eupeace.eu</a></p>
+
+    <h3>2. Finalità del Trattamento</h3>
+    <p>I dati personali sono trattati esclusivamente per fornire un sistema di autenticazione e autorizzazione trans-istituzionale sicuro verso i servizi digitali EUPEACE (es. Moodle) tramite l'interfederazione eduGAIN. Questo servizio aderisce al GÉANT Data Protection Code of Conduct (CoCo).</p>
+
+    <h3>3. Attributi Richiesti e Base Giuridica</h3>
+    <p>Per garantire il corretto funzionamento dei servizi, il proxy richiede al Provider di Identità (IdP) di origine il seguente set minimo di attributi SAML:</p>
+    <ul>
+        <li><strong>eduPersonPrincipalName (ePPN):</strong> Necessario per l'identificazione univoca dell'utente e la creazione del profilo nell'infrastruttura federata.</li>
+        <li><strong>mail:</strong> Indispensabile per le comunicazioni di servizio, l'invio di notifiche dalle piattaforme e il supporto tecnico.</li>
+        <li><strong>givenName (Nome) e sn (Cognome):</strong> Richiesti per la corretta identificazione all'interno dell'ambiente didattico e per l'emissione nominale degli attestati ufficiali.</li>
+        <li><strong>eduPersonScopedAffiliation:</strong> Fondamentale per determinare lo status istituzionale dell'utente (es. studente, docente, personale tecnico) al fine di assegnare automaticamente i corretti permessi di accesso nei servizi collegati.</li>
+        <li><strong>schacPersonalUniqueCode (European Student Identifier - ESI):</strong> Necessario per l'identificazione univoca degli studenti tra le istituzioni universitarie europee, agevolando la mobilità transnazionale.</li>
+    </ul>
+    <p class="text-muted fst-italic"><small>* Nota: Il dominio dell'istituzione di appartenenza dell'utente viene ricavato direttamente dal suffisso (scope) di eduPersonPrincipalName o eduPersonScopedAffiliation, garantendo il principio di minimizzazione dei dati.</small></p>
+
+    <h3>4. Conservazione dei Dati</h3>
+    <p>I dati personali sono conservati esclusivamente per la durata della partecipazione attiva dell'utente ai servizi EUPEACE. I dati vengono cancellati automaticamente 12 mesi dopo l'ultimo accesso dell'utente, conservando unicamente i log resi anonimi per ragioni di sicurezza informatica.</p>
+
+    <h3>5. Diritti dell'Interessato</h3>
+    <p>Ai sensi del Regolamento Generale sulla Protezione dei Dati (GDPR), gli utenti mantengono il diritto di richiedere l'accesso, la rettifica o la cancellazione dei propri dati personali contattando il DPO all'indirizzo <a href="mailto:dpo@eupeace.eu">dpo@eupeace.eu</a>.</p>
+
+    <h3>6. Utilizzo dei Cookie</h3>
+    <p>Questo servizio utilizza esclusivamente cookie tecnici strettamente necessari (es. cookie di sessione e token CSRF) indispensabili per l'autenticazione sicura dell'utente e il corretto funzionamento del sistema. Non vengono utilizzati cookie di tracciamento, profilazione o marketing.</p>
+</div>
+{% endblock %}

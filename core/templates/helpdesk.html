@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Helpdesk - EUPEACE Proxy{% endblock %}
+
+{% block extra_head %}
+<style>
+    .login-card {
+        max-width: 800px !important;
+    }
+
+    .help-section h2 {
+        font-size: 1.5rem;
+        color: var(--eupeace-blue);
+        border-bottom: 2px solid var(--eupeace-light-gray);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .help-section h3 {
+        font-size: 1.1rem;
+        color: #333;
+        margin-top: 1.5rem;
+        font-weight: 700;
+    }
+
+    .help-section p,
+    .help-section li {
+        font-size: 0.95rem;
+        color: #555;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'wayf' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1 text-decoration-none shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+        </svg>
+        <span class="fw-semibold">Torna alla Home / Back to Home</span>
+    </a>
+</div>
+
+<div class="help-section overflow-auto" style="max-height: 70vh; padding-right: 15px;">
+    <!-- English Section -->
+    <h2 class="fw-bold">EUPEACE Helpdesk & Support</h2>
+    <p>If you encounter any issues logging in or accessing the federated alliance services, please contact the appropriate support channel below.</p>
+
+    <h3>Technical Support (Authentication & IT Issues)</h3>
+    <ul>
+        <li><strong>Email:</strong> <a href="mailto:support@eupeace.eu">support@eupeace.eu</a></li>
+        <li><strong>Technical Operations:</strong> <a href="mailto:tech@eupeace.eu">tech@eupeace.eu</a></li>
+        <li><strong>Security & Incident Response:</strong> <a href="mailto:abuse@eupeace.eu">abuse@eupeace.eu</a></li>
+    </ul>
+
+    <hr class="my-5">
+
+    <!-- Italian Section -->
+    <h2 class="fw-bold">Helpdesk e Supporto EUPEACE</h2>
+    <p>Se riscontri problemi durante l'accesso o l'utilizzo dei servizi federati dell'alleanza, contatta i canali di supporto indicati.</p>
+
+    <h3>Supporto Tecnico (Problemi di Autenticazione e IT)</h3>
+    <ul>
+        <li><strong>Email:</strong> <a href="mailto:support@eupeace.eu">support@eupeace.eu</a></li>
+        <li><strong>Team Tecnico:</strong> <a href="mailto:tech@eupeace.eu">tech@eupeace.eu</a></li>
+        <li><strong>Segnalazioni Sicurezza:</strong> <a href="mailto:abuse@eupeace.eu">abuse@eupeace.eu</a></li>
+    </ul>
+</div>
+{% endblock %}

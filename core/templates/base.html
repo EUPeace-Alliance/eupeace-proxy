@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EUPEACE - Services Login{% endblock %}</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --eupeace-blue: #003865;
+            --eupeace-yellow: #F2A900;
+            --eupeace-light-gray: #f8f9fa;
+        }
+        body {
+            font-family: 'Titillium Web', sans-serif;
+            background-color: var(--eupeace-light-gray);
+        }
+        .brand-panel {
+            background-color: var(--eupeace-blue);
+            border-top: 8px solid var(--eupeace-yellow);
+        }
+        .btn-eupeace {
+            background-color: var(--eupeace-blue);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-eupeace:hover {
+            background-color: #002240; 
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .btn-eupeace-outline {
+            border: 2px solid var(--eupeace-blue);
+            color: var(--eupeace-blue);
+            font-weight: 600;
+        }
+        .btn-eupeace-outline:hover {
+            background-color: var(--eupeace-light-gray);
+            color: var(--eupeace-blue);
+        }
+        .login-card {
+            max-width: 450px;
+            width: 100%;
+        }
+        .brand-link {
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            cursor: pointer;
+        }
+        .brand-link:hover {
+            opacity: 0.92;
+            transform: scale(1.01);
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="container-fluid vh-100 p-0">
+        <div class="row g-0 h-100">
+            <div class="col-md-5 col-lg-6 d-none d-md-flex flex-column justify-content-center align-items-center text-white brand-panel">
+                <a href="{% url 'wayf' %}" class="text-decoration-none text-white text-center d-flex flex-column align-items-center brand-link">
+                    <img src="https://www.eupeace.eu/wp-content/uploads/logo_eupeace.svg" alt="EUPEACE Logo" class="img-fluid mb-4" style="max-width: 280px;">
+                    <h1 class="fw-bold display-4" style="letter-spacing: 2px;">EUPEACE</h1>
+                    <p class="fs-5 mt-2 text-center px-4" style="color: #e0e0e0;">
+                        European University for Peace, Justice, and Inclusive Societies
+                    </p>
+                </a>
+            </div>
+
+            <div class="col-md-7 col-lg-6 d-flex flex-column position-relative bg-white shadow-lg">
+                <div class="m-auto login-card p-4 p-sm-5">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+
+                <div class="mt-auto p-4 text-center">
+                    <small>
+                        <a href="{% url 'service_info' %}" class="text-decoration-none text-muted mx-2 border-bottom">Informazioni / Info</a>
+                        <span class="text-muted">|</span>
+                        <a href="{% url 'privacy' %}" class="text-decoration-none text-muted mx-2 border-bottom">Privacy Policy</a>
+                        <span class="text-muted">|</span>
+                        <a href="{% url 'helpdesk' %}" class="text-decoration-none text-muted mx-2 border-bottom">Helpdesk</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

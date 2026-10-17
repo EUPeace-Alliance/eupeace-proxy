@@ -1,0 +1,41 @@
+# Python & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+
+# Databases & persistent volume data
+*.sqlite3
+db.sqlite3
+media/
+logs/
+*.log
+
+# Cryptographic Keys, Certificates & Secrets
+# Absolutely no certificates or keys may ever be tracked by Git
+certs/
+*.pem
+*.key
+*.crt
+*.cert
+
+# Operating System & IDE metadata
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker local override
+docker-compose.override.yml

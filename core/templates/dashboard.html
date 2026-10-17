@@ -1,0 +1,334 @@
+{% extends 'base_dashboard.html' %}
+
+{% block title %}Dashboard - EUPEACE{% endblock %}
+
+{% block content %}
+<!-- Sistema di Notifiche -->
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm"
+        role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Navbar Superiore -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4 rounded">
+    <div class="container">
+        <span class="navbar-brand fw-bold d-flex align-items-center" style="color: var(--eupeace-blue);">
+            EUPEACE Services Dashboard
+        </span>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-muted small d-none d-md-inline">
+                Logged in as <strong>{{ user.first_name|default:user.username }} {{ user.last_name }}</strong>
+            </span>
+            <a href="{% url 'custom_logout' %}" class="btn btn-sm btn-outline-danger fw-bold">
+                Log Out
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Sezione 1: Profilo e Azioni Rapide -->
+    <div class="row mb-4 g-4">
+        <!-- Card Profilo Utente -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-light rounded-circle d-inline-flex justify-content-center align-items-center me-3"
+                            style="width: 50px; height: 50px; border: 2px solid var(--eupeace-yellow);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="var(--eupeace-blue)"
+                                class="bi bi-person-fill" viewBox="0 0 16 16">
+                                <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                            </svg>
+                        </div>
+                        <h5 class="fw-bold mb-0" style="color: var(--eupeace-blue);">My Profile</h5>
+                    </div>
+                    <ul class="list-unstyled mb-0 text-muted small">
+                        <li class="mb-2"><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</li>
+                        <li class="mb-2"><strong>Email:</strong> {{ user.email }}</li>
+                        <li><strong>Identifier (ePPN):</strong> {{ user.username }}</li>
+                        {% if user.profile.esi %}
+                        <li class="mb-2"><strong>European Student Identifier:</strong> {{ user.profile.formatted_esi|safe }}</li>
+                        {% endif %}
+
+                        {% if user.profile.affiliation %}
+                        <li class="mb-2"><strong>Role:</strong> {{ user.profile.affiliation }}</li>
+                        {% endif %}
+
+                        {% if user.profile.home_organization %}
+                        <li><strong>Organization:</strong> {{ user.profile.home_organization }}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Invito Guest -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100 bg-light">
+                <div class="card-body p-4 d-flex flex-column justify-content-center align-items-start">
+                    <h5 class="fw-bold" style="color: var(--eupeace-blue);">External Collaboration</h5>
+                    <p class="text-muted small mb-3">Invite external experts to securely access the EUPEACE network via
+                        eduGAIN.</p>
+                    <button type="button" class="btn btn-outline-dark fw-bold d-flex align-items-center"
+                        data-bs-toggle="modal" data-bs-target="#inviteModal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                            class="bi bi-envelope-plus me-2" viewBox="0 0 16 16">
+                            <path
+                                d="M2 2a2 2 0 0 0-2 2v8.01A2 2 0 0 0 2 14h5.5a.5.5 0 0 0 0-1H2a1 1 0 0 1-.966-.741l5.64-3.471L8 9.583l7-4.2V8.5a.5.5 0 0 0 1 0V4a2 2 0 0 0-2-2H2Zm3.708 6.208L1 11.105V5.383l4.708 2.825ZM1 4.217V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v.217l-7 4.2-7-4.2Z" />
+                            <path
+                                d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm.5-5v1.5H14a.5.5 0 0 1 0 1h-1.5V15a.5.5 0 0 1-1 0v-1.5H10a.5.5 0 0 1 0-1h1.5V11a.5.5 0 0 1 1 0Z" />
+                        </svg>
+                        Invite a Guest
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sezione 2: Catalogo Servizi Alleanza -->
+    <h4 class="fw-bold mb-3 mt-4" style="color: var(--eupeace-blue);">Available Services Catalog</h4>
+
+    <!-- Filtri di ricerca -->
+    <form method="GET" class="row g-3 mb-4">
+        <div class="col-md-5">
+            <input type="text" name="q" class="form-control" placeholder="Search service by name or description..."
+                value="{{ current_q }}">
+        </div>
+        <div class="col-md-5">
+            <select name="provider" class="form-select">
+                <option value="">All Providers</option>
+                {% for code, name in providers %}
+                <option value="{{ code }}" {% if current_provider == code %}selected{% endif %}>{{ name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn text-white w-100 fw-bold"
+                style="background-color: var(--eupeace-blue);">Filter</button>
+        </div>
+    </form>
+
+    <!-- Griglia a 3 Colonne -->
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
+        {% for service in page_obj %}
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0 transition-hover bg-light">
+                <!-- Immagine/Logo (Opzionale) -->
+                {% if service.logo_url %}
+                <div class="p-3 bg-white text-center rounded-top"
+                    style="height: 140px; display: flex; align-items: center; justify-content: center;">
+                    <img src="{{ service.logo_url }}" alt="{{ service.name }} logo"
+                        style="max-height: 100px; max-width: 100%; object-fit: contain;">
+                </div>
+                {% endif %}
+
+                <div class="card-body text-start">
+                    <!-- Badge Erogatore -->
+                    {% for p_code, color in provider_colors.items %}
+                    {% if service.provider == p_code %}
+                    <span class="badge bg-{{ color }} mb-2 shadow-sm">{{ service.get_provider_display }}</span>
+                    {% endif %}
+                    {% endfor %}
+
+                    <h5 class="card-title fw-bold mt-1">{{ service.name }}</h5>
+                    <p class="card-text text-muted small">{{ service.description|truncatewords:20 }}</p>
+                </div>
+                <div class="card-footer bg-light border-0 pb-3 text-end">
+                    <a href="{{ service.url }}" target="_blank" rel="noopener noreferrer"
+                        class="btn text-white fw-bold px-4" style="background-color: var(--eupeace-blue);">Access</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-light text-center border text-muted">
+                No services match your search criteria or are assigned to your role.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginazione Django (Lata Server) -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Service catalog navigation" class="mb-5">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link"
+                    href="?page={{ page_obj.previous_page_number }}&q={{ current_q }}&provider={{ current_provider }}">Previous</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+
+            <li class="page-item disabled">
+                <span class="page-link fw-bold text-dark">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages
+                    }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link"
+                    href="?page={{ page_obj.next_page_number }}&q={{ current_q }}&provider={{ current_provider }}">Next</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    <!-- Sezione 3: Tabella Inviti Gestiti (DataTables) -->
+    <div class="card border-0 shadow-sm mb-5 mt-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+            <h5 class="fw-bold" style="color: var(--eupeace-blue);">Guest Invitations You Have Sent</h5>
+        </div>
+        <div class="card-body p-4">
+            {% if sent_invitations %}
+            <div class="table-responsive">
+                <!-- Aggiunto ID invitationsTable per agganciare DataTables -->
+                <table id="invitationsTable" class="table table-hover align-middle small w-100">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Guest Email</th>
+                            <th>Send Date</th>
+                            <th>Link Expiry</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invite in sent_invitations %}
+                        <tr>
+                            <td class="fw-bold">{{ invite.guest_email }}</td>
+                            <!-- Aggiunto data-sort per ordinare correttamente le date in formato europeo -->
+                            <td data-sort="{{ invite.created_at|date:'YmdHi' }}">{{ invite.created_at|date:"d/m/Y H:i"
+                                }}</td>
+                            <td data-sort="{{ invite.expires_at|date:'YmdHi' }}">{{ invite.expires_at|date:"d/m/Y" }}
+                            </td>
+                            <td>
+                                {% if invite.is_used %}
+                                <span class="badge bg-success">Registered</span>
+                                {% elif invite.is_valid %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Expired</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not invite.is_used %}
+                                <form action="{% url 'revoke_invitation' invite.token %}" method="POST" class="m-0"
+                                    onsubmit="return confirm('Are you sure you want to revoke the invitation for {{ invite.guest_email }}?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger p-1"
+                                        title="Revoke Invitation" style="line-height: 1;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                            fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                            <path
+                                                d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .471-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z" />
+                                        </svg>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">You haven't sent any invitations yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal Invito Guest (Rimasto Invariato) -->
+<div class="modal fade" id="inviteModal" tabindex="-1" aria-labelledby="inviteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-0">
+                <h5 class="modal-title fw-bold" id="inviteModalLabel" style="color: var(--eupeace-blue);">Invite
+                    External Guest</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'create_invitation' %}" method="POST">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <p class="small text-muted mb-4">Enter the email address of the external expert and set the validity
+                        period of their access.</p>
+
+                    <div class="mb-3">
+                        <label for="guest_email" class="form-label fw-bold">Guest Email Address</label>
+                        <input type="email" class="form-control" id="guest_email" name="guest_email" required
+                            placeholder="expert@example.com">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="duration_days" class="form-label fw-bold">Account Validity</label>
+                        <select class="form-select" id="duration_days" name="duration_days" required>
+                            <option value="7">1 Week (7 days)</option>
+                            <option value="30">1 Month (30 days)</option>
+                            <option value="90">3 Months (90 days)</option>
+                            <option value="180" selected>6 Months (180 days)</option>
+                            <option value="365">1 Year (365 days)</option>
+                        </select>
+                        <div class="form-text">Select how long the guest account will remain active.</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn text-white fw-bold"
+                        style="background-color: var(--eupeace-blue);">Send Invitation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .transition-hover {
+        transition: all 0.3s ease;
+    }
+
+    .transition-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Script jQuery e DataTables per la tabella Inviti -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#invitationsTable').DataTable({
+            "language": {
+                // Impostato in inglese per uniformità con il resto della dashboard
+                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json"
+            },
+            "order": [[1, "desc"]], // Ordina decrescente per Data Invio (Colonna indice 1)
+            "pageLength": 5, // Limita a 5 righe per non occupare troppo spazio visivo
+            "lengthChange": false, // Disabilita il menu a tendina "Mostra X elementi"
+            "info": true,
+            "searching": true // Mantiene la barra di ricerca attiva
+        });
+    });
+</script>
+{% endblock %}

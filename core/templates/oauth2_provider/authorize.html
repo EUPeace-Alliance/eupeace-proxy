@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Authorization Request - EUPEACE{% endblock %}
+
+{% block content %}
+<div class="text-center mb-4">
+    <div class="mb-3">
+        <span class="badge bg-warning text-dark fs-6">Authorization Request</span>
+    </div>
+    <h3 class="fw-bold" style="color: var(--eupeace-blue);">{{ application.name }}</h3>
+    <p class="text-muted">wants to access your EUPEACE account</p>
+</div>
+
+<div class="alert alert-light border mb-4">
+    <p class="mb-2 fw-bold text-dark">The application will have access to:</p>
+    <ul class="mb-0 text-muted small">
+        {% for scope in scopes_descriptions %}
+            <li>{{ scope }}</li>
+        {% empty %}
+            <li>Profile information</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<p class="small text-muted mb-4 text-center">
+    Logged in as <strong>{{ request.user.username }}</strong>. 
+    By authorizing this app, you accept its terms of use.
+</p>
+
+<form method="post" action="">
+    {% csrf_token %}
+    {{ form.errors }}
+    {{ form.non_field_errors }}
+    
+    {% for field in form %}
+        {% if field.is_hidden %}
+            {{ field }}
+        {% endif %}
+    {% endfor %}
+
+    <div class="d-grid gap-3">
+        <button type="submit" class="btn btn-eupeace btn-lg fw-bold py-2" name="allow" value="Authorize">
+            Authorize Access
+        </button>
+        <button type="submit" class="btn btn-eupeace-outline btn-lg py-2" name="cancel" value="Cancel">
+            Cancel
+        </button>
+    </div>
+</form>
+{% endblock %}

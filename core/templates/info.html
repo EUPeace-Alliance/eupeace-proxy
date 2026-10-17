@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Service Information - EUPEACE Proxy{% endblock %}
+
+{% block extra_head %}
+<style>
+    .login-card {
+        max-width: 800px !important; 
+    }
+    .info-section h2 {
+        font-size: 1.5rem;
+        color: var(--eupeace-blue);
+        border-bottom: 2px solid var(--eupeace-light-gray);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .info-section h3 {
+        font-size: 1.1rem;
+        color: #333;
+        margin-top: 1.5rem;
+        font-weight: 700;
+    }
+    .info-section p, .info-section li {
+        font-size: 0.95rem;
+        color: #555;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'wayf' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1 text-decoration-none shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+        </svg>
+        <span class="fw-semibold">Torna alla Home / Back to Home</span>
+    </a>
+</div>
+
+<div class="info-section overflow-auto" style="max-height: 70vh; padding-right: 15px;">
+    <!-- English Section (IDEM PTO SP-FED02 Compliance) -->
+    <h2 class="fw-bold">Information on the EUPEACE Authentication Proxy Service</h2>
+    
+    <h3>1. Description of the Service</h3>
+    <p>The EUPEACE Authentication Proxy is the centralized Identity and Access Management (IAM) infrastructure developed for the European University for Peace, Justice, and Inclusive Societies (EUPeace) Alliance. The proxy provides secure, federated Single Sign-On (SSO) authentication via the IDEM GARR Federation and the international eduGAIN interfederation, allowing students, researchers, faculty, and administrative staff to access digital alliance services (including collaborative platforms, joint Moodle LMS environments, and academic tools) using their home institution's credentials.</p>
+
+    <h3>2. Target Audience (Community Serviced)</h3>
+    <p>The service is dedicated to the following communities:</p>
+    <ul>
+        <li>Students, master's students, and doctoral candidates enrolled at EUPeace Alliance partner institutions.</li>
+        <li>Academic, teaching, and research personnel participating in joint degrees, alliance modules, or collaborative projects.</li>
+        <li>Administrative and technical staff coordinating inter-institutional alliance programs.</li>
+        <li>Authorized guest users and international researchers specifically invited to alliance platforms.</li>
+    </ul>
+
+    <h3>3. Managing Organization</h3>
+    <p>The service is technically coordinated and operated for the European University Alliance:</p>
+    <p><strong>EUPeace European University Alliance</strong><br>
+    Identity and Access Management Infrastructure<br>
+    Official Website: <a href="https://www.eupeace.eu" target="_blank" rel="noopener noreferrer">https://www.eupeace.eu</a></p>
+
+    <h3>4. User Support and Contacts</h3>
+    <p>For technical assistance, login troubleshooting, or inquiries regarding federated access:</p>
+    <ul>
+        <li><strong>Helpdesk Portal:</strong> <a href="{% url 'helpdesk' %}">EUPEACE Helpdesk & Support Page</a></li>
+        <li><strong>Technical Support Email:</strong> <a href="mailto:support@eupeace.eu">support@eupeace.eu</a></li>
+        <li><strong>Security & Incident Response:</strong> <a href="mailto:abuse@eupeace.eu">abuse@eupeace.eu</a></li>
+    </ul>
+
+    <h3>5. Personal Data Protection and Privacy Policy</h3>
+    <p>The service adheres strictly to the General Data Protection Regulation (EU Regulation 2016/679 - GDPR) and the GÉANT Data Protection Code of Conduct (CoCo). Data is processed exclusively for identity verification and authorization, applying strict data minimization principles.</p>
+    <p>To read the complete details on processed attributes, data retention policies, and data subject rights, please visit:<br>
+    👉 <a href="{% url 'privacy' %}" class="fw-bold text-decoration-none">EUPEACE Proxy Privacy Policy</a></p>
+
+    <hr class="my-5">
+
+    <!-- Italian Section (IDEM PTO SP-FED02 Compliance) -->
+    <h2 class="fw-bold">Informazioni sul Servizio Proxy di Autenticazione EUPEACE</h2>
+    
+    <h3>1. Descrizione del Servizio</h3>
+    <p>Il Proxy di Autenticazione EUPEACE è l'infrastruttura centralizzata di Identity and Access Management (IAM) realizzata per l'Alleanza delle Università Europee per la Pace, la Giustizia e le Società Inclusive (EUPeace). Il proxy consente l'autenticazione federata Single Sign-On (SSO) integrandosi con la Federazione IDEM GARR e con l'interfederazione internazionale eduGAIN, permettendo a studenti, docenti e personale di accedere ai servizi digitali dell'alleanza (come piattaforme didattiche Moodle congiunte, ambienti di collaborazione e strumenti accademici) tramite le proprie credenziali universitarie istituzionali.</p>
+
+    <h3>2. Pubblico a cui si rivolge il Servizio</h3>
+    <p>Il servizio è rivolto alle seguenti categorie di utenti:</p>
+    <ul>
+        <li>Studenti, laureandi e dottorandi iscritti presso le università partner dell'Alleanza EUPeace.</li>
+        <li>Personale docente e ricercatori coinvolti in insegnamenti congiunti, mobilità e progetti dell'alleanza.</li>
+        <li>Personale tecnico e amministrativo responsabile del coordinamento inter-istituzionale.</li>
+        <li>Utenti ospiti e collaboratori accademici internazionali invitati a partecipare a specifiche attività dell'alleanza.</li>
+    </ul>
+
+    <h3>3. Organizzazione che gestisce il Servizio</h3>
+    <p>Il servizio è gestito e coordinato a livello tecnologico per l'Alleanza delle Università Europee:</p>
+    <p><strong>Alleanza Universitaria Europea EUPeace</strong><br>
+    Infrastruttura di Identity and Access Management<br>
+    Sito Istituzionale: <a href="https://www.eupeace.eu" target="_blank" rel="noopener noreferrer">https://www.eupeace.eu</a></p>
+
+    <h3>4. Supporto Utenti e Canali di Assistenza</h3>
+    <p>Per assistenza tecnica, segnalazione di problemi di autenticazione o richieste di informazioni:</p>
+    <ul>
+        <li><strong>Portale Helpdesk:</strong> <a href="{% url 'helpdesk' %}">Pagina Assistenza e Supporto EUPEACE</a></li>
+        <li><strong>Email di Supporto Tecnico:</strong> <a href="mailto:support@eupeace.eu">support@eupeace.eu</a></li>
+        <li><strong>Segnalazioni Sicurezza:</strong> <a href="mailto:abuse@eupeace.eu">abuse@eupeace.eu</a></li>
+    </ul>
+
+    <h3>5. Trattamento dei Dati Personali e Privacy</h3>
+    <p>Il trattamento dei dati personali avviene nel pieno rispetto del Regolamento Generale sulla Protezione dei Dati (Regolamento UE 2016/679 - GDPR) e delle linee guida internazionali GÉANT Data Protection Code of Conduct (CoCo). I dati ricevuti tramite asserzioni SAML sono limitati a quanto strettamente necessario per l'identificazione e l'assegnazione dei ruoli.</p>
+    <p>Per visionare l'informativa privacy completa con le finalità, la durata di conservazione e l'esercizio dei diritti dell'interessato:<br>
+    👉 <a href="{% url 'privacy' %}" class="fw-bold text-decoration-none">Informativa Privacy del Proxy EUPEACE</a></p>
+</div>
+{% endblock %}

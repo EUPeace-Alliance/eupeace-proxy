@@ -170,8 +170,7 @@
             {% endif %}
 
             <li class="page-item disabled">
-                <span class="page-link fw-bold text-dark">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages
-                    }}</span>
+                <span class="page-link fw-bold text-dark">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
             </li>
 
             {% if page_obj.has_next %}
@@ -210,10 +209,8 @@
                         <tr>
                             <td class="fw-bold">{{ invite.guest_email }}</td>
                             <!-- Aggiunto data-sort per ordinare correttamente le date in formato europeo -->
-                            <td data-sort="{{ invite.created_at|date:'YmdHi' }}">{{ invite.created_at|date:"d/m/Y H:i"
-                                }}</td>
-                            <td data-sort="{{ invite.expires_at|date:'YmdHi' }}">{{ invite.expires_at|date:"d/m/Y" }}
-                            </td>
+                            <td data-sort="{{ invite.created_at|date:'YmdHi' }}">{{ invite.created_at|date:"d/m/Y H:i" }}</td>
+                            <td data-sort="{{ invite.expires_at|date:'YmdHi' }}">{{ invite.expires_at|date:"d/m/Y" }}</td>
                             <td>
                                 {% if invite.is_used %}
                                 <span class="badge bg-success">Registered</span>

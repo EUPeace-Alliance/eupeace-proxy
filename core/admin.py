@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import GuestInvitation, GuestProfile, AllianceService, IdentityProvider, AuditLog
+from .models import GuestInvitation, GuestProfile, AllianceService, IdentityProvider, AuditLog, UserFavoriteService
 
 
 @admin.register(GuestInvitation)
@@ -43,3 +43,10 @@ class AuditLogAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+@admin.register(UserFavoriteService)
+class UserFavoriteServiceAdmin(admin.ModelAdmin):
+    list_display = ('user', 'service', 'created_at')
+    list_filter = ('created_at', 'service__provider')
+    search_fields = ('user__username', 'user__email', 'service__name')
+    raw_id_fields = ('user', 'service')

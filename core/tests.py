@@ -2,7 +2,7 @@ from django.test import TestCase, Client, override_settings
 from django.contrib.auth.models import User
 from django.urls import reverse
 from oauth2_provider.models import Application
-from core.models import UserProfile, AllianceService, AuditLog
+from core.models import UserProfile, AllianceService, AuditLog, UserFavoriteService
 
 
 @override_settings(
@@ -233,3 +233,72 @@ class OAuth2GatekeepingTestCase(TestCase):
         url3 = f"{reverse('oauth2_provider:authorize')}?response_type=code&client_id={self.app_inactive.client_id}&redirect_uri={self.app_inactive.redirect_uris}"
         resp3 = self.client.get(url3)
         self.assertEqual(resp3.status_code, 302)
+
+
+@override_settings(
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    },
+    SESSION_ENGINE='django.contrib.sessions.backends.db',
+)
+class UserFavoriteServiceTestCase(TestCase):
+    def setUp(self):
+        from core.models import IdentityProvider
+        self.client = Client()
+        self.idp = IdentityProvider.objects.create(
+            name='Università della Calabria',
+            short_code='UNICAL',
+            entity_id='https://idp.unical.it/idp/shibboleth',
+            is_active=True
+        )
+        self.user = User.objects.create_user(
+            username='fav_test_user', email='fav@example.org', password='password123'
+        )
+        self.user._saml_issuer = self.idp.entity_id
+        self.service1 = AllianceService.objects.create(
+            name='Service 1', description='Desc 1', url='https://s1.org', provider='UNICAL', is_active=True
+        )
+        self.service2 = AllianceService.objects.create(
+            name='Service 2', description='Desc 2', url='https://s2.org', provider='MARBURG', is_active=True
+        )
+
+    def test_toggle_favorite_service_ajax(self):
+        self.client.force_login(self.user)
+        url = reverse('toggle_favorite_service', kwargs={'service_id': self.service1.id})
+
+        # 1. Add favorite via AJAX
+        response = self.client.post(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['status'], 'ok')
+        self.assertTrue(data['is_favorite'])
+        self.assertEqual(data['service_id'], self.service1.id)
+        self.assertTrue(UserFavoriteService.objects.filter(user=self.user, service=self.service1).exists())
+
+        # 2. Toggle again to remove favorite
+        response2 = self.client.post(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response2.status_code, 200)
+        data2 = response2.json()
+        self.assertEqual(data2['status'], 'ok')
+        self.assertFalse(data2['is_favorite'])
+        self.assertFalse(UserFavoriteService.objects.filter(user=self.user, service=self.service1).exists())
+
+    def test_dashboard_favorites_filter(self):
+        self.client.force_login(self.user)
+        UserFavoriteService.objects.create(user=self.user, service=self.service1)
+
+        # Dashboard without filter: shows both services
+        resp = self.client.get(reverse('dashboard'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(len(resp.context['page_obj']), 2)
+        self.assertIn(self.service1.id, resp.context['user_favorite_ids'])
+        self.assertEqual(resp.context['total_favorites_count'], 1)
+
+        # Dashboard with favorites=1: only shows service1
+        resp_fav = self.client.get(reverse('dashboard') + '?favorites=1')
+        self.assertEqual(resp_fav.status_code, 200)
+        self.assertEqual(len(resp_fav.context['page_obj']), 1)
+        self.assertEqual(resp_fav.context['page_obj'][0].id, self.service1.id)
+

@@ -13,9 +13,9 @@ from urllib.parse import quote
 from hybrid_project.saml_backend import EupeaceSamlBackend
 from djangosaml2.views import LoginView
 from oauth2_provider.views import AuthorizationView
-from .models import GuestInvitation, AllianceService, IdentityProvider, AuditLog, get_client_ip
+from .models import GuestInvitation, AllianceService, IdentityProvider, AuditLog, get_client_ip, UserFavoriteService
 from .forms import GuestInvitationForm
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
 from django.core.paginator import Paginator
 
@@ -221,10 +221,37 @@ def revoke_invitation_view(request, token):
 
 @login_required
 @never_cache
+@require_POST
+def toggle_favorite_service(request, service_id):
+    """
+    Toggle a service in the user's favorites.
+    Supports asynchronous requests (JSON response) and fallback to redirect.
+    """
+    service = get_object_or_404(AllianceService, id=service_id, is_active=True)
+    fav = UserFavoriteService.objects.filter(user=request.user, service=service).first()
+    if fav:
+        fav.delete()
+        is_favorite = False
+    else:
+        UserFavoriteService.objects.create(user=request.user, service=service)
+        is_favorite = True
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in request.headers.get('accept', ''):
+        return JsonResponse({
+            'status': 'ok',
+            'service_id': service.id,
+            'is_favorite': is_favorite,
+        })
+
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard'))
+
+
+@login_required
+@never_cache
 def dashboard(request):
     """
     Dashboard view that manages both services and invitations,
-    including search, provider filtering, and pagination.
+    including search, provider filtering, favorites filtering, and pagination.
     """
     # Resume any pending OAuth2 flow
     oauth2_next = request.session.pop('oauth2_next_url', None)
@@ -257,6 +284,15 @@ def dashboard(request):
 
     search_query = request.GET.get('q', '')
     provider_filter = request.GET.get('provider', '')
+    favorites_only = request.GET.get('favorites', '') == '1'
+
+    # Retrieve all favorite service IDs for the current user in a single indexed query
+    user_favorite_ids = set(
+        UserFavoriteService.objects.filter(user=user).values_list('service_id', flat=True)
+    )
+
+    if favorites_only:
+        services_base = services_base.filter(id__in=user_favorite_ids)
 
     if search_query:
         services_base = services_base.filter(
@@ -289,6 +325,9 @@ def dashboard(request):
         'providers': AllianceService.PROVIDER_CHOICES,
         'current_q': search_query,
         'current_provider': provider_filter,
+        'favorites_only': favorites_only,
+        'user_favorite_ids': user_favorite_ids,
+        'total_favorites_count': len(user_favorite_ids),
         'provider_colors': provider_colors,
     }
     return render(request, 'dashboard.html', context)

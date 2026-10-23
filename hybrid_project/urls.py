@@ -16,6 +16,7 @@ urlpatterns = [
     path('gestione/', admin.site.urls),
     path('', views.wayf_view, name='wayf'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('services/<int:service_id>/toggle-favorite/', views.toggle_favorite_service, name='toggle_favorite_service'),
     path('logout/', custom_logout, name='custom_logout'),
     
     path('saml2/login/', CustomSAML2LoginView.as_view(), name='saml2_login'),

@@ -106,6 +106,22 @@ class AllianceService(models.Model):
 
 
 
+class UserFavoriteService(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorite_services')
+    service = models.ForeignKey(AllianceService, on_delete=models.CASCADE, related_name='favorited_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "User Favorite Service"
+        verbose_name_plural = "User Favorite Services"
+        unique_together = ('user', 'service')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.service.name}"
+
+
+
 class IdentityProvider(models.Model):
     name = models.CharField(max_length=150, verbose_name="Identity Provider Name")
     short_code = models.CharField(max_length=50, unique=True, help_text="Es. UNICAL, MARBURG")

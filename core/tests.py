@@ -302,3 +302,131 @@ class UserFavoriteServiceTestCase(TestCase):
         self.assertEqual(len(resp_fav.context['page_obj']), 1)
         self.assertEqual(resp_fav.context['page_obj'][0].id, self.service1.id)
 
+
+@override_settings(
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    },
+    SESSION_ENGINE='django.contrib.sessions.backends.db',
+)
+class SecurityHardeningTestCase(TestCase):
+    """
+    Regression tests verifying cryptographic dependency baselines, Brotli decoder
+    protection (CVE-2026-111497 / PYSEC-2026-4322 / PYSEC-2026-4323), and IDEM GARR /
+    eduGAIN SAML 2.0 SP metadata structural integrity.
+    """
+
+    def test_brotli_decoder_not_vulnerable(self):
+        import importlib.metadata
+        from packaging.version import Version
+        import requests
+        import urllib3.response
+
+        vulnerable_found = []
+        for pkg_name, min_safe in [('Brotli', '1.2.1'), ('brotlicffi', '1.2.1.0')]:
+            try:
+                installed_ver = importlib.metadata.version(pkg_name)
+                if Version(installed_ver) < Version(min_safe):
+                    vulnerable_found.append(f"{pkg_name}=={installed_ver} (< {min_safe})")
+            except importlib.metadata.PackageNotFoundError:
+                pass
+
+        self.assertEqual(
+            vulnerable_found,
+            [],
+            f"Vulnerable Brotli package(s) detected (PYSEC-2026-4322/4323): {vulnerable_found}",
+        )
+
+        # When Brotli is omitted (default posture), urllib3/requests must not advertise 'br'
+        if urllib3.response.brotli is None:
+            session = requests.Session()
+            prepared = session.prepare_request(requests.Request('GET', 'https://mdx.idem.garr.it/edugain/'))
+            accept_enc = prepared.headers.get('Accept-Encoding', '')
+            self.assertNotIn('br', [enc.strip() for enc in accept_enc.split(',')])
+
+    def test_cryptography_and_pysaml2_security_baseline(self):
+        import importlib.metadata
+        from packaging.version import Version
+
+        crypto_ver = Version(importlib.metadata.version('cryptography'))
+        pysaml2_ver = Version(importlib.metadata.version('pysaml2'))
+
+        # Mitigates CVE-2026-69249 & CVE-2026-26007
+        self.assertGreaterEqual(crypto_ver, Version('49.0.0'))
+        self.assertGreaterEqual(pysaml2_ver, Version('7.5.5'))
+
+    def test_saml_metadata_generation_integrity(self):
+        import datetime
+        import tempfile
+        from copy import deepcopy
+        from django.conf import settings
+        from defusedxml import ElementTree as ET
+        from cryptography import x509
+        from cryptography.x509.oid import NameOID
+        from cryptography.hazmat.primitives import hashes, serialization
+        from cryptography.hazmat.primitives.asymmetric import rsa
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            key_path = f"{tmpdir}/private.key"
+            cert_path = f"{tmpdir}/public.cert"
+
+            key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+            with open(key_path, 'wb') as f:
+                f.write(key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.TraditionalOpenSSL,
+                    encryption_algorithm=serialization.NoEncryption(),
+                ))
+
+            subject = issuer = x509.Name([
+                x509.NameAttribute(NameOID.COUNTRY_NAME, 'EU'),
+                x509.NameAttribute(NameOID.COMMON_NAME, 'proxy.eupeace.eu'),
+            ])
+            cert = (
+                x509.CertificateBuilder()
+                .subject_name(subject)
+                .issuer_name(issuer)
+                .public_key(key.public_key())
+                .serial_number(1)
+                .not_valid_before(datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc))
+                .not_valid_after(datetime.datetime(2036, 1, 1, tzinfo=datetime.timezone.utc))
+                .sign(key, hashes.SHA256())
+            )
+            with open(cert_path, 'wb') as f:
+                f.write(cert.public_bytes(serialization.Encoding.PEM))
+
+            saml_cfg = deepcopy(settings.SAML_CONFIG)
+            saml_cfg['key_file'] = key_path
+            saml_cfg['cert_file'] = cert_path
+            saml_cfg['encryption_keypairs'] = [{'key_file': key_path, 'cert_file': cert_path}]
+
+            with override_settings(
+                SAML_CONFIG=saml_cfg,
+                ALLOWED_HOSTS=['proxy.eupeace.eu', 'testserver', 'localhost'],
+            ):
+                resp = self.client.get('/saml2/metadata/', HTTP_HOST='proxy.eupeace.eu', secure=True)
+                self.assertEqual(resp.status_code, 200)
+
+                ns = {'md': 'urn:oasis:names:tc:SAML:2.0:metadata'}
+                root = ET.fromstring(resp.content)
+                self.assertEqual(root.attrib.get('entityID'), saml_cfg['entityid'])
+
+                sp_sso = root.find('md:SPSSODescriptor', ns)
+                self.assertIsNotNone(sp_sso)
+                self.assertEqual(sp_sso.attrib.get('AuthnRequestsSigned'), 'true')
+                self.assertEqual(sp_sso.attrib.get('WantAssertionsSigned'), 'true')
+
+                key_uses = [kd.attrib.get('use') for kd in sp_sso.findall('md:KeyDescriptor', ns)]
+                self.assertIn('signing', key_uses)
+                self.assertIn('encryption', key_uses)
+
+                acs = sp_sso.find('md:AssertionConsumerService', ns)
+                self.assertIsNotNone(acs)
+                self.assertTrue(acs.attrib.get('Location', '').endswith('/saml2/acs/'))
+
+                contacts = root.findall('md:ContactPerson', ns)
+                self.assertGreaterEqual(len(contacts), 3)
+
+

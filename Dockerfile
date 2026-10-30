@@ -25,12 +25,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy and install Python dependencies
-COPY requirements.txt .
+# Copy and install Python dependencies with security constraints
+COPY requirements.txt constraints.txt ./
 RUN pip install --upgrade pip setuptools wheel \
-    && pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir -r requirements.txt -c constraints.txt \
     # Ensure gunicorn and gevent are installed
-    && pip install --no-cache-dir gunicorn gevent
+    && pip install --no-cache-dir -c constraints.txt gunicorn gevent
 
 # Copy all project code into the container
 COPY . .

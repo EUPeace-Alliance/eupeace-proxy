@@ -144,7 +144,22 @@ In accordance with the **GÉANT Data Protection Code of Conduct (CoCo)** and GDP
 
 ---
 
-## 8. Incident Reporting & Security Contacts
+## 8. Dependency Hardening & Reverse-Proxy Rate Limiting
+
+### Supply-Chain & Cryptographic Baselines (`constraints.txt`)
+* **Cryptographic & SAML Libraries:** Pinned to `cryptography>=50.0.2`, `pyOpenSSL>=26.4.0`, and `pysaml2>=7.5.5` to remediate X.509 certificate path-validation DoS (**CVE-2026-69249**) and binary elliptic-curve subgroup flaws (**CVE-2026-26007**) while preserving full byte-for-byte SAML 2.0 metadata compatibility with IDEM GARR / eduGAIN.
+* **Brotli C-Decoder Mitigation (**CVE-2026-111497** / **PYSEC-2026-4322** / **PYSEC-2026-4323**):** `Brotli` and `brotlicffi` are intentionally omitted from runtime dependencies so outbound HTTP clients (`requests` / `urllib3`) only negotiate `gzip, deflate`. Build-time `constraints.txt` rules (`Brotli>=1.2.1`, `brotlicffi>=1.2.1.0`) and automated regression tests (`SecurityHardeningTestCase`) block accidental introduction of vulnerable versions.
+
+### Selective Nginx Rate Limiting (`nginx/conf.d/default.conf`)
+* **Federation & Discovery Exemption:** `/saml2/metadata/` and `/o/.well-known/` evaluate to an empty rate-limit key (`""`), ensuring IDEM GARR / eduGAIN metadata harvesters and OIDC JWKS checks are never throttled.
+* **Endpoint Protection (calibrated for University Campus NATs & Moodle back-channel exchanges):**
+  * `/saml2/(login|acs|ls)`: `10r/s` (`burst=50 nodelay`)
+  * `/o/(authorize|token|revoke_token|introspect|userinfo)`: `30r/s` (`burst=100 nodelay`)
+  * `/gestione/login/`: `2r/s` (`burst=10 nodelay`), returning HTTP `429 Too Many Requests`.
+
+---
+
+## 9. Incident Reporting & Security Contacts
 
 Security incidents, vulnerability disclosures, or metadata compliance concerns should be directed to the security contacts declared in the official SAML metadata:
 

@@ -1,0 +1,18 @@
+# Security version constraints enforced by pip (-c constraints.txt)
+# Note: Constraints do NOT install packages unless requested; they enforce safe bounds
+# if a package is ever pulled in directly or transitively.
+
+# Mitigates CVE-2026-111497 (PYSEC-2026-4322 / PYSEC-2026-4323) in Google Brotli C decoders:
+# Brotli/brotlicffi are intentionally omitted from requirements.txt so urllib3/requests only
+# advertise 'Accept-Encoding: gzip, deflate'. If ever introduced transitively, vulnerable
+# versions (<=1.2.0 / <=1.2.0.2) are rejected at build time.
+Brotli>=1.2.1
+brotlicffi>=1.2.1.0
+
+# Minimum cryptographic & SAML security baselines (CVE-2026-69249, CVE-2026-26007, CVE-2026-39373)
+cryptography>=50.0.2
+pyOpenSSL>=26.4.0
+pysaml2>=7.5.5
+jwcrypto>=1.5.7
+urllib3>=2.7.0
+
